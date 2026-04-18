@@ -23,6 +23,7 @@ build/
 htmlcov/
 .coverage
 coverage.xml
+*.db
 
 # Node
 node_modules/
