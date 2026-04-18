@@ -1,4 +1,12 @@
-.PHONY: install dev build test lint format migrate seed logs down clean
+.PHONY: install dev build test lint format migrate seed logs down clean compose-check
+
+COMPOSE := $(shell if command -v docker-compose >/dev/null 2>&1; then echo docker-compose; elif docker compose version >/dev/null 2>&1; then echo "docker compose"; fi)
+
+compose-check:
+	@if [ -z "$(COMPOSE)" ]; then \
+		echo "✗ Docker Compose not found. Install docker-compose or Docker CLI compose plugin."; \
+		exit 127; \
+	fi
 
 install: ## Install all dependencies
 	@echo "→ Installing backend dependencies..."
@@ -6,13 +14,13 @@ install: ## Install all dependencies
 	@echo "→ Installing frontend dependencies..."
 	cd frontend && npm install
 
-dev: ## Start all services in development mode
+dev: compose-check ## Start all services in development mode
 	@echo "→ Starting StudyAI in development mode..."
-	docker-compose up --build
+	$(COMPOSE) up --build
 
-build: ## Build production Docker images
+build: compose-check ## Build production Docker images
 	@echo "→ Building production images..."
-	docker-compose -f docker-compose.yml build
+	$(COMPOSE) -f docker-compose.yml build
 
 test: ## Run all tests
 	@echo "→ Running backend tests..."
@@ -40,14 +48,14 @@ seed: ## Seed demo data
 	@echo "→ Seeding demo data..."
 	cd backend && python ../scripts/seed_demo.py
 
-logs: ## Tail all service logs
-	docker-compose logs -f
+logs: compose-check ## Tail all service logs
+	$(COMPOSE) logs -f
 
-down: ## Stop all services
-	docker-compose down
+down: compose-check ## Stop all services
+	$(COMPOSE) down
 
-clean: ## Remove all containers, volumes, and build artifacts
-	docker-compose down -v --remove-orphans
+clean: compose-check ## Remove all containers, volumes, and build artifacts
+	$(COMPOSE) down -v --remove-orphans
 	find . -type d -name __pycache__ -exec rm -rf {} +
 	find . -type d -name node_modules -exec rm -rf {} +
 	find . -name "*.pyc" -delete
