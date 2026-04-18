@@ -4,8 +4,8 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 
 from .config import settings
 from .guardrails import enforce_rate_limit, moderate_user_input, now_iso, require_api_key
-from .memory import get_session, init_db, save_audit, save_feedback
-from .models import FeedbackRequest, RunRequest, RunResponse, SessionResponse
+from .memory import get_metrics, get_session, init_db, save_audit, save_feedback
+from .models import FeedbackRequest, MetricsResponse, RunRequest, RunResponse, SessionResponse
 from .orchestrator import CofounderOrchestrator
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -53,3 +53,8 @@ def submit_feedback(payload: FeedbackRequest, _: str = Depends(require_api_key))
     save_feedback(payload.session_id, payload.score, payload.comments, created_at)
     save_audit("feedback_submitted", {"session_id": payload.session_id, "score": payload.score}, created_at)
     return {"status": "received"}
+
+
+@app.get("/api/cofounder/metrics", response_model=MetricsResponse)
+def read_metrics(_: str = Depends(require_api_key)) -> dict:
+    return get_metrics()

@@ -81,3 +81,16 @@ def save_audit(event: str, details: dict, created_at: str) -> None:
             "INSERT INTO audit_logs (event, details, created_at) VALUES (?, ?, ?)",
             (event, json.dumps(details), created_at),
         )
+
+
+def get_metrics() -> dict:
+    with _conn() as conn:
+        total_sessions = conn.execute("SELECT COUNT(*) AS count FROM sessions").fetchone()["count"]
+        feedback = conn.execute(
+            "SELECT COUNT(*) AS count, AVG(score) AS avg_score FROM feedback"
+        ).fetchone()
+        return {
+            "total_sessions": int(total_sessions),
+            "feedback_count": int(feedback["count"]),
+            "average_feedback_score": float(feedback["avg_score"]) if feedback["avg_score"] is not None else None,
+        }

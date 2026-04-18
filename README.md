@@ -1,8 +1,6 @@
 # StudyAI 🧠
 
-> AI-powered notes summariser and study material generator built on **CrewAI** multi-agent orchestration.
-
-Paste any text — lecture notes, textbook excerpts, articles. Four AI agents collaborate to generate a complete study package in seconds.
+> AI cofounder MVP that turns startup ideas into structured planning artifacts using a multi-agent backend.
 
 ## Architecture
 
@@ -65,29 +63,33 @@ open http://localhost:5173
 | `APP_DEBUG`               | ❌       | Enable debug mode (default: true)        |
 | `CORS_ORIGINS`            | ❌       | Comma-separated allowed origins          |
 
-## API Reference
+## API Reference (Current MVP)
 
-| Method | Endpoint                        | Description                          |
-|--------|---------------------------------|--------------------------------------|
-| POST   | `/api/study/run`                | Queue a pipeline run                 |
-| GET    | `/api/study/stream/{job_id}`    | SSE stream of agent progress         |
-| GET    | `/api/study/result/{job_id}`    | Get completed study package          |
-| GET    | `/api/study/history`            | Paginated user history               |
-| GET    | `/api/study/export/pdf/{job_id}`| Download PDF export                  |
-| GET    | `/api/study/export/anki/{job_id}`| Download Anki .apkg deck            |
-| GET    | `/api/study/export/markdown/{job_id}`| Get Markdown export            |
-| GET    | `/api/health`                   | Health check                         |
-| POST   | `/api/auth/verify`              | Verify Supabase JWT                  |
+| Method | Endpoint                          | Description                                  |
+|--------|-----------------------------------|----------------------------------------------|
+| GET    | `/api/health`                     | Health check                                 |
+| POST   | `/api/cofounder/run`              | Run idea → plan/research/PRD/review pipeline |
+| GET    | `/api/cofounder/session/{id}`     | Retrieve saved run artifacts                 |
+| POST   | `/api/cofounder/feedback`         | Submit feedback score/comments               |
+| GET    | `/api/cofounder/metrics`          | Read basic evaluation metrics                |
 
 ## Development
 
 ```bash
 make install    # install all deps
-make dev        # docker-compose up --build
-make test       # run pytest + tsc
-make lint       # ruff + eslint
+make test       # run backend pytest + frontend tsc
+make lint       # run backend ruff + frontend eslint
+make build      # build docker images
 make logs       # tail all service logs
 make down       # stop all services
+```
+
+## Authentication
+
+All `/api/cofounder/*` endpoints require:
+
+```text
+x-api-key: <APP_SECRET_KEY>
 ```
 
 ## Test Locally (No Docker)

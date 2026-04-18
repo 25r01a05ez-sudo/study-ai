@@ -41,3 +41,26 @@ def test_prompt_injection_rejected() -> None:
 def test_auth_required() -> None:
     response = client.post("/api/cofounder/run", json={"idea": "Valid startup idea", "tier": "free"})
     assert response.status_code == 401
+
+
+def test_feedback_and_metrics() -> None:
+    run_res = client.post(
+        "/api/cofounder/run",
+        headers=HEADERS,
+        json={"idea": "Agent for startup execution support", "tier": "free"},
+    )
+    assert run_res.status_code == 200
+    session_id = run_res.json()["session_id"]
+
+    feedback_res = client.post(
+        "/api/cofounder/feedback",
+        headers=HEADERS,
+        json={"session_id": session_id, "score": 4, "comments": "Useful draft"},
+    )
+    assert feedback_res.status_code == 200
+
+    metrics_res = client.get("/api/cofounder/metrics", headers=HEADERS)
+    assert metrics_res.status_code == 200
+    metrics = metrics_res.json()
+    assert metrics["total_sessions"] >= 1
+    assert metrics["feedback_count"] >= 1

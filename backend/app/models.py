@@ -25,3 +25,9 @@ class SessionResponse(BaseModel):
     created_at: str
     idea: str
     artifacts: dict
+
+
+class MetricsResponse(BaseModel):
+    total_sessions: int
+    feedback_count: int
+    average_feedback_score: float | None
