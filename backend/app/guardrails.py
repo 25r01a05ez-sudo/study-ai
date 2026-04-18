@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import UTC, date
+from datetime import UTC, date, datetime
 
 from fastapi import HTTPException, Request, status
 
@@ -40,4 +40,4 @@ def moderate_user_input(text: str) -> None:
 
 
 def now_iso() -> str:
-    return __import__("datetime").datetime.now(UTC).isoformat()
+    return datetime.now(UTC).isoformat()
