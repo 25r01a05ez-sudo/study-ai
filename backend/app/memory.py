@@ -3,6 +3,7 @@ import sqlite3
 from pathlib import Path
 
 DB_PATH = Path(__file__).resolve().parents[1] / "studyai.db"
+_INITIALIZED = False
 
 
 def _conn() -> sqlite3.Connection:
@@ -46,7 +47,16 @@ def init_db() -> None:
         )
 
 
+def ensure_db() -> None:
+    global _INITIALIZED
+    if _INITIALIZED:
+        return
+    init_db()
+    _INITIALIZED = True
+
+
 def save_session(session_id: str, created_at: str, idea: str, artifacts: dict) -> None:
+    ensure_db()
     with _conn() as conn:
         conn.execute(
             "INSERT OR REPLACE INTO sessions (session_id, created_at, idea, artifacts) VALUES (?, ?, ?, ?)",
@@ -55,6 +65,7 @@ def save_session(session_id: str, created_at: str, idea: str, artifacts: dict) -
 
 
 def get_session(session_id: str) -> dict | None:
+    ensure_db()
     with _conn() as conn:
         row = conn.execute("SELECT * FROM sessions WHERE session_id = ?", (session_id,)).fetchone()
         if not row:
@@ -68,6 +79,7 @@ def get_session(session_id: str) -> dict | None:
 
 
 def save_feedback(session_id: str, score: int, comments: str | None, created_at: str) -> None:
+    ensure_db()
     with _conn() as conn:
         conn.execute(
             "INSERT INTO feedback (session_id, score, comments, created_at) VALUES (?, ?, ?, ?)",
@@ -76,6 +88,7 @@ def save_feedback(session_id: str, score: int, comments: str | None, created_at:
 
 
 def save_audit(event: str, details: dict, created_at: str) -> None:
+    ensure_db()
     with _conn() as conn:
         conn.execute(
             "INSERT INTO audit_logs (event, details, created_at) VALUES (?, ?, ?)",
@@ -84,6 +97,7 @@ def save_audit(event: str, details: dict, created_at: str) -> None:
 
 
 def get_metrics() -> dict:
+    ensure_db()
     with _conn() as conn:
         total_sessions = conn.execute("SELECT COUNT(*) AS count FROM sessions").fetchone()["count"]
         feedback = conn.execute(
